@@ -1,0 +1,71 @@
+[manpage_begin bonjour n 0.1]
+[copyright {2006 Blair Kitchen <blair@the-blair.com>}]
+[moddesc {Networking}]
+[moddesc {Bonjour Library}]
+[require Tcl 8.4]
+[require bonjour [opt 0.1]]
+[description]
+
+[para]
+This package provides script level access to the Bonjour library.
+Bonjour allows registration of network services so that they
+can easily be located by name and/or browsed for by service type.
+
+[para]
+The bonjour package currently supports browsing for services
+and service name resolution.  Support for service registration is
+planned in an upcoming version.
+
+[para]
+The bonjour package provides the following commands:
+
+[list_begin definitions]
+
+[call [cmd {::bonjour::browse start}] [arg regtype] [arg callback]]
+This procedure begins a browse operation for a given service type.
+Evey time a service is added or removed to the list of running services,
+[arg callback] will be executed.
+[nl]
+[arg regtype] - The service type to browse (i.e., _http._tcp)
+[nl]
+[arg callback] - The command to call when a service is added or
+removed from the list of running services.  Three arguments will
+be appended to the command: the action (either "add" or "remove"),
+the service name, and the domain.
+
+[call [cmd {::bonjour::browse stop}] [arg regtype]]
+This procedure stops a browse operation.  The callback registered
+for [arg regtype] will no longer be called and no new services will
+be added.
+[nl]
+[arg regtype] - The service type (i.e., _http._tcp)
+
+[call [cmd ::bonjour::resolve] [arg name] [arg regtype] [arg domain] [arg script]]
+This procedure resolves the given service name into a hostname and port.
+[nl]
+[arg name] - The name of the service to resolve
+[nl]
+[arg regtype] - The service type (i.e., _http._tcp)
+[nl]
+[arg domain] - The domain for the service, as returned by the browse
+callback
+[nl]
+[arg script] - The script to execute when the resolution has completed.
+Four arguments will be appended to the callback script:  The full
+service name, the hostname, the port, and a list of txt records for
+the service.  The list of records will be of the form {key value 
+?key value? ...}.
+
+[call [cmd ::bonjour::register] [arg regtype] [arg port] [arg ?txt-record?]]
+This procedure registers a new service using Bonjour.
+[nl]
+[arg regtype] - The service type (i.e., _http._tcp)
+[nl]
+[arg port] - The port number for the service
+[nl]
+[arg txt-record] - This argument is optional and specifies a list of txt 
+record entries.  The list should be of the form {key value ?key value? ...}.
+
+[list_end]
+
+[manpage_end]
