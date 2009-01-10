@@ -1,0 +1,31 @@
+h3. Overview
+
+This package provides script level access to the Bonjour library. Bonjour allows registration of network services so that they can easily be located by name and/or browsed for by service type.
+
+The bonjour package currently supports browsing for services and service name resolution.  Support for service registration is planned in an upcoming version.
+
+h3. Commands
+
+The bonjour package provides the following commands:
+
+* @::bonjour::browse start <regtype> <callback>@ - This procedue begins a browse operation for a given service type.  Every time a service is added or removed to the list of running services, @callback@ will be executed.
+** @regtype@ - The service type to browse (i.e., @_http._tcp@)
+** @callback@ - The command to call when a service is added or removed from the list of running services.  Three arguments will be appended to the command:
+*** the action (either @add@ or @remove@)
+*** the service name
+*** the domain
+* @::bonjour::browse stop <regtype>@ - This procedure stops a browse operation. The callback registered for @regtype@ will no longer be called and no new services will be aded.
+** @regtype@ - The service type (i.e., @_http._tcp@)
+* @::bonjour::resolve <name> <regtype> <domain> <script>@ - This procedure resolves the given service name into a hostname and port.
+** @name@ - The name of the service to resolve
+** @regtype@ - The service type (i.e., @_http._tcp@)
+** @domain@ - The domain for the service, as returned by the browse callback.
+** @script@ - The script to execute when the resolution has completed. Four arguments will be appended to the callback script:
+*** The full service name
+*** The hostname
+*** The port
+*** a list of txt records for the service.  The list of records will be of the form @{key value ?key value? ...}@.
+* @::bonjour::register <regtype> <port> ?txt-record?@ - This procedure registers a new service using Bonjour.
+** @regtype@ - The service type (i.e., @_http._tcp@)
+** @port@ - The port number for the service
+** @txt-record@ - This argument is optional and specifies a list of txt record entries.  The list should be of the form @{key value ?key value? ...}@.
