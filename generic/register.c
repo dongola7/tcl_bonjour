@@ -147,7 +147,7 @@ static int bonjour_register(
                       0, 0,
                       NULL, regtype,
                       NULL, NULL,
-                      (uint16_t)port,
+                      htons((uint16_t)port),
                       txtLen, txtRecord, // txt record stuff
                       NULL, NULL); // callback stuff
 

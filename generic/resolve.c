@@ -178,7 +178,7 @@ static void bonjour_resolve_callback(
       Tcl_ListObjAppendElement(
          activeResolve->interp,
          activeResolve->callback,
-         Tcl_NewIntObj(port));
+         Tcl_NewIntObj(ntohs(port)));
 
       // create the TXT record list
       txt2list(txtLen, txtRecord, &txtRecordList);
