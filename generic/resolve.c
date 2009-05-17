@@ -28,6 +28,7 @@ DAMAGE.
 #include <string.h>
 
 #include <tcl.h>
+#include <arpa/inet.h>
 #include <dns_sd.h>
 
 #include "bonjour.h"
@@ -129,7 +130,7 @@ static int bonjour_resolve(
       hostname,
       regtype,
       domain,
-      bonjour_resolve_callback,
+      (DNSServiceResolveReply)bonjour_resolve_callback,
       (void *)activeResolve);
 
    // retrieve the socket being used for the resolve operation

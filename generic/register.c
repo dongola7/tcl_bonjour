@@ -27,6 +27,7 @@ DAMAGE.
 
 #include <string.h>
 #include <tcl.h>
+#include <arpa/inet.h>
 
 #include <dns_sd.h>
 
