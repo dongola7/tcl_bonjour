@@ -2,7 +2,6 @@ Makefile
 autom4te.cache
 *.o
 config.*
-configure
 doc/*.html
 *.dylib
 pkgIndex.tcl
