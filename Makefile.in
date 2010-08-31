@@ -181,8 +181,8 @@ binaries: $(BINARIES) pkgIndex.tcl
 libraries:
 
 doc:
-	dtp doc html doc/bonjour.man > doc/bonjour.html  
-	dtp doc nroff doc/bonjour.man > doc/bonjour.n
+	tclsh make_doc.tcl html < doc/bonjour.man > doc/bonjour.html
+	tclsh make_doc.tcl nroff < doc/bonjour.man > doc/bonjour.n
 
 install: all install-binaries install-libraries install-doc
 
