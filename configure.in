@@ -122,6 +122,8 @@ TEA_PUBLIC_TCL_HEADERS
 #TEA_PRIVATE_TK_HEADERS
 #TEA_PATH_X
 
+AC_CHECK_HEADER(dns_sd.h, [AC_SEARCH_LIBS(DNSServiceRegister, [dns_sd])])
+
 #--------------------------------------------------------------------
 # Check whether --enable-threads or --disable-threads was given.
 # This auto-enables if Tcl was compiled threaded.
