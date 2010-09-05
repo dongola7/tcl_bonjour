@@ -1,8 +1,5 @@
 # Example client using the bonjour package.
-
-lappend auto_path .
-
-package require Tcl 8.4
+package require Tcl 8.5
 package require bonjour
 
 # Called when a service is resolved (details are retrieved).
