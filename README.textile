@@ -33,3 +33,7 @@ The bonjour package provides the following commands:
 ** @regtype@ - The service type (i.e., @_http._tcp@)
 ** @port@ - The port number for the service
 ** @txt-record@ - This argument is optional and specifies a list of txt record entries.  The list should be of the form @{key value ?key value? ...}@.
+
+h1. Reporting Bugs and Requesting Features
+
+Please report all bugs and feature requests via the GitHub issue tracker at http://github.com/dongola7/tcl_bonjour/issues.
