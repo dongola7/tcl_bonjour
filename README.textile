@@ -4,6 +4,10 @@ This package provides script level access to the Bonjour library. Bonjour allows
 
 The bonjour package currently supports browsing for services, service name resolution, and service registration.
 
+h1. Installation
+
+The bonjour package may be installed using the standard @configure; make; make install@ procedure.
+
 h1. Commands
 
 The bonjour package provides the following commands:
