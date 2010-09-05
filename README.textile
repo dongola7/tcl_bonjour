@@ -1,10 +1,10 @@
-h3. Overview
+h1. Overview
 
 This package provides script level access to the Bonjour library. Bonjour allows registration of network services so that they can easily be located by name and/or browsed for by service type.
 
-The bonjour package currently supports browsing for services and service name resolution.  Support for service registration is planned in an upcoming version.
+The bonjour package currently supports browsing for services, service name resolution, and service registration.
 
-h3. Commands
+h1. Commands
 
 The bonjour package provides the following commands:
 
