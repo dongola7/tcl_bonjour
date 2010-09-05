@@ -3,6 +3,7 @@ autom4te.cache
 *.o
 config.*
 doc/*.html
+doc/*.man
 doc/*.n
 *.dylib
 pkgIndex.tcl
