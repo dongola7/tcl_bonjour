@@ -1,9 +1,9 @@
-[manpage_begin bonjour n 0.1]
-[copyright {2006 Blair Kitchen <blair@the-blair.com>}]
+[manpage_begin bonjour n 1.0]
+[copyright {2010 Blair Kitchen <blair@the-blair.com>}]
 [moddesc {Networking}]
 [moddesc {Bonjour Library}]
-[require Tcl 8.4]
-[require bonjour [opt 0.1]]
+[require Tcl 8.5]
+[require bonjour [opt 1.0]]
 [description]
 
 [para]
