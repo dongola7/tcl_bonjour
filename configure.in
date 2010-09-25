@@ -122,7 +122,12 @@ TEA_PUBLIC_TCL_HEADERS
 #TEA_PRIVATE_TK_HEADERS
 #TEA_PATH_X
 
-AC_CHECK_HEADER(dns_sd.h, [AC_SEARCH_LIBS(DNSServiceRegister, [dns_sd])])
+AC_CHECK_HEADER([dns_sd.h], 
+    [AC_SEARCH_LIBS(DNSServiceRegister, 
+        [dns_sd],,
+        [AC_MSG_ERROR([cannot find libdns_sd])])], 
+    [AC_MSG_ERROR([dns_sd.h not found])])
+
 
 #--------------------------------------------------------------------
 # Check whether --enable-threads or --disable-threads was given.

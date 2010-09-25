@@ -5061,9 +5061,14 @@ ac_res=$ac_cv_search_DNSServiceRegister
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
+else
+  as_fn_error $? "cannot find libdns_sd" "$LINENO" 5
 fi
 
+else
+  as_fn_error $? "dns_sd.h not found" "$LINENO" 5
 fi
+
 
 
 
