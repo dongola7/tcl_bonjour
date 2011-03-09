@@ -33,6 +33,11 @@ The bonjour package provides the following commands:
 ** @regtype@ - The service type (i.e., @_http._tcp@)
 ** @port@ - The port number for the service
 ** @txt-record@ - This argument is optional and specifies a list of txt record entries.  The list should be of the form @{key value ?key value? ...}@.
+* @::bonjour::register_with_name <service_name> <regtype> <port> ?txt-record?@ - This procedure registers a new service using Bonjour but using the service_name provided rather than letting Bonjour choose one.
+** @service_name@ - The service name (i.e., @"My service on [info hostname]@)
+** @regtype@ - The service type (i.e., @_http._tcp@)
+** @port@ - The port number for the service
+** @txt-record@ - This argument is optional and specifies a list of txt record entries.  The list should be of the form @{key value ?key value? ...}@.
 
 h1. Reporting Bugs and Requesting Features
 
