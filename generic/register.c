@@ -57,6 +57,12 @@ static int bonjour_register(
    int objc,
    Tcl_Obj *const objv[]
 );
+static int bonjour_register_with_name(
+   ClientData clientData,
+   Tcl_Interp *interp,
+   int objc,
+   Tcl_Obj *const objv[]
+);
 static int bonjour_register_cleanup(
    ClientData clientData
 );
@@ -76,6 +82,18 @@ int Register_Init(
       interp, "::bonjour::register", bonjour_register,
       &registerRegistrations, NULL
    );
+
+// FG ++ 110307
+// Added an additional command here so that scripts using
+// the previous syntax could stay the same.  This additional
+// command allows the user to specify the service name
+// rather than it automatically using the host name.
+
+   Tcl_CreateObjCommand(
+      interp, "::bonjour::register_with_name", bonjour_register_with_name,
+      &registerRegistrations, NULL
+   );
+// FG --
 
    // create an exit handler for cleanup
    Tcl_CreateExitHandler(
@@ -147,6 +165,86 @@ static int bonjour_register(
    DNSServiceRegister(&activeRegister->sdRef,
                       0, 0,
                       NULL, regtype,
+                      NULL, NULL,
+                      htons((uint16_t)port),
+                      txtLen, txtRecord, // txt record stuff
+                      NULL, NULL); // callback stuff
+
+   // free the txt record
+   ckfree(txtRecord);
+
+   return TCL_OK;
+}
+
+// FG ++ 110307
+// Added an additional command here so that scripts using
+// the previous syntax could stay the same.
+// FG --
+
+////////////////////////////////////////////////////
+// ::bonjour::register_with_name
+////////////////////////////////////////////////////
+static int bonjour_register_with_name(
+   ClientData clientData,
+   Tcl_Interp *interp,
+   int objc,
+   Tcl_Obj *const objv[]
+) {
+   const char *regtype;
+   const char *service_name;
+   unsigned int port;
+   active_registration *activeRegister;
+   Tcl_HashTable *registerRegistrations = (Tcl_HashTable *)clientData;
+   Tcl_HashEntry *hashEntry;
+   int newFlag = 0;
+   uint16_t txtLen = 0;
+   void *txtRecord = NULL;
+
+   if(objc < 4 || objc > 5) {
+      Tcl_WrongNumArgs(interp, 1, objv, "<service_name> <regtype> <port> ?txt-record-list?");
+      return(TCL_ERROR);
+   }
+
+   // retrieve the registration type
+   service_name = Tcl_GetString(objv[1]);
+
+   // retrieve the registration type
+   regtype = Tcl_GetString(objv[2]);
+
+   // retrieve the port number
+   if(Tcl_GetIntFromObj(interp, objv[3], (int *)&port) != TCL_OK)
+      return TCL_ERROR;
+   
+   // retrieve the txt record list, if applicable
+   if(objc > 3)
+   {
+      list2txt(objv[4], &txtLen, &txtRecord);
+   }
+
+   // attempt to create an entry in the hash table
+   // for this regtype
+   hashEntry = 
+      Tcl_CreateHashEntry(registerRegistrations, regtype, &newFlag);
+   // if an entry already exists, return an error
+   if(!newFlag) {
+      Tcl_Obj *errorMsg = Tcl_NewStringObj(NULL, 0);
+      Tcl_AppendStringsToObj(
+         errorMsg, "regtype ", regtype, " is already registered", NULL);
+      Tcl_SetObjResult(interp, errorMsg);
+      return(TCL_ERROR);
+   }
+
+   // create the activeRegister structure
+   activeRegister = (active_registration *)ckalloc(sizeof(active_registration));
+   activeRegister->regtype = (char *)ckalloc(strlen(regtype) + 1);
+   strcpy(activeRegister->regtype, regtype);
+
+   // store the activeRegister structure
+   Tcl_SetHashValue(hashEntry, activeRegister);
+
+   DNSServiceRegister(&activeRegister->sdRef,
+                      0, 0,
+                      service_name, regtype,
                       NULL, NULL,
                       htons((uint16_t)port),
                       txtLen, txtRecord, // txt record stuff
