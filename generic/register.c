@@ -96,7 +96,8 @@ static int bonjour_register(
    int objc,
    Tcl_Obj *const objv[]
 ) {
-   const char *regtype;
+   const char *serviceName = NULL;
+   const char *regtype = NULL;
    unsigned int port;
    active_registration *activeRegister;
    Tcl_HashTable *registerRegistrations = (Tcl_HashTable *)clientData;
@@ -105,22 +106,52 @@ static int bonjour_register(
    uint16_t txtLen = 0;
    void *txtRecord = NULL;
 
-   if(objc < 3 || objc > 4) {
-      Tcl_WrongNumArgs(interp, 1, objv, "<regtype> <port> ?txt-record-list?");
+   const char *options[] = { "-name", "--", NULL };
+   enum optionIndex { OPT_NAME, OPT_END };
+
+   if(objc < 3) {
+   }
+
+   // parse options
+   int objIndex;
+   for(objIndex = 1; objIndex < objc; objIndex++) {
+      if(Tcl_GetString(objv[objIndex])[0] != '-') {
+         break;
+      }
+
+      int index;
+      if(Tcl_GetIndexFromObj(interp, objv[objIndex], options, "option", 0, &index) == TCL_ERROR) {
+         return TCL_ERROR;
+      }
+
+      if(index == OPT_NAME) {
+         objIndex++;
+         serviceName = Tcl_GetString(objv[objIndex]);
+      }
+      else if(index == OPT_END) {
+         objIndex++;
+         break;
+      }
+   }
+
+   int numArgs = objc - objIndex;
+   if(numArgs < 2 || numArgs > 3)
+   {
+      Tcl_WrongNumArgs(interp, 1, objv, "?switches? <regtype> <port> ?txt-record-list?");
       return(TCL_ERROR);
    }
 
    // retrieve the registration type (service name)
-   regtype = Tcl_GetString(objv[1]);
+   regtype = Tcl_GetString(objv[objIndex]);
 
    // retrieve the port number
-   if(Tcl_GetIntFromObj(interp, objv[2], (int *)&port) != TCL_OK)
+   if(Tcl_GetIntFromObj(interp, objv[objIndex + 1], (int *)&port) != TCL_OK)
       return TCL_ERROR;
    
    // retrieve the txt record list, if applicable
-   if(objc > 3)
+   if(numArgs == 3)
    {
-      list2txt(objv[3], &txtLen, &txtRecord);
+      list2txt(objv[objIndex + 2], &txtLen, &txtRecord);
    }
 
    // attempt to create an entry in the hash table
@@ -146,7 +177,7 @@ static int bonjour_register(
 
    DNSServiceRegister(&activeRegister->sdRef,
                       0, 0,
-                      NULL, regtype,
+                      serviceName, regtype,
                       NULL, NULL,
                       htons((uint16_t)port),
                       txtLen, txtRecord, // txt record stuff

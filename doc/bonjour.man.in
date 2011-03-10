@@ -56,8 +56,11 @@ service name, the hostname, the port, and a list of txt records for
 the service.  The list of records will be of the form {key value 
 ?key value? ...}.
 
-[call [cmd ::bonjour::register] [arg regtype] [arg port] [arg ?txt-record?]]
+[call [cmd ::bonjour::register] [arg ?options?] [arg regtype] [arg port] [arg ?txt-record?]]
 This procedure registers a new service using Bonjour.
+[nl]
+[arg options] - Either -name, followed by the desired service name, or -- to explicitly
+indicate the end of options.
 [nl]
 [arg regtype] - The service type (i.e., _http._tcp)
 [nl]

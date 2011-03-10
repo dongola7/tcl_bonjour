@@ -21,6 +21,7 @@ proc serviceFound {regType action name domain} {
 
 # Start looking for myservice services.
 ::bonjour::browse start _myservice._tcp [list serviceFound _myservice._tcp]
+::bonjour::browse start _myotherservice._tcp [list serviceFound _myotherservice._tcp]
 
 # Enter the event loop.
 vwait forever
