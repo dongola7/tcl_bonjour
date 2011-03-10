@@ -34,7 +34,7 @@ The bonjour package provides the following commands:
 *** The port
 *** a list of txt records for the service.  The list of records will be of the form @{key value ?key value? ...}@.
 * @::bonjour::register ?options? <regtype> <port> ?txt-record?@ - This procedure registers a new service using Bonjour.
-** @options@ - Either -name, followed by the desired service name, or -- to explicitly indicate the end of options.
+** @options@ - Either \-name, followed by the desired service name, or \-\- to explicitly indicate the end of options.
 ** @regtype@ - The service type (i.e., @_http._tcp@)
 ** @port@ - The port number for the service
 ** @txt-record@ - This argument is optional and specifies a list of txt record entries.  The list should be of the form @{key value ?key value? ...}@.
