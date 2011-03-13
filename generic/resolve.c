@@ -56,6 +56,12 @@ static int bonjour_resolve(
    int objc,
    Tcl_Obj *const objv[]
 );
+static int bonjour_resolve_address(
+   ClientData clientData,
+   Tcl_Interp *interp,
+   int objc,
+   Tcl_Obj *const objv[]
+);
 static void bonjour_resolve_callback(
    DNSServiceRef sdRef,
    DNSServiceFlags flags,
@@ -66,6 +72,19 @@ static void bonjour_resolve_callback(
    uint16_t port,
    uint16_t txtLen,
    const char *txtRecord,
+   void *context
+);
+static void bonjour_resolve_address_callback(
+   DNSServiceRef sdRef,
+   DNSServiceFlags flags,
+   uint32_t interfaceIndex,
+   DNSServiceErrorType errorCode,
+   const char *fullname,
+   uint16_t rrtype,
+   uint16_t rrclass,
+   uint16_t rdlen,
+   const void *rdata,
+   uint32_t ttl,
    void *context
 );
 
@@ -79,6 +98,11 @@ int Resolve_Init(
    // register commands
    Tcl_CreateObjCommand(
       interp, "::bonjour::resolve", bonjour_resolve,
+      NULL, NULL
+   );
+
+   Tcl_CreateObjCommand(
+      interp, "::bonjour::resolve_address", bonjour_resolve_address,
       NULL, NULL
    );
 
@@ -133,6 +157,62 @@ static int bonjour_resolve(
       (DNSServiceResolveReply)bonjour_resolve_callback,
       (void *)activeResolve);
 
+   // retrieve the socket being used for the resolve operation
+   // and register a file handler so that we know when
+   // there is data to be read
+   Tcl_CreateFileHandler(
+      DNSServiceRefSockFD(activeResolve->sdRef),
+      TCL_READABLE,
+      bonjour_tcl_callback,
+      activeResolve->sdRef);
+
+   return(TCL_OK);
+}
+
+////////////////////////////////////////////////////
+// ::bonjour::resolve_address command
+////////////////////////////////////////////////////
+static int bonjour_resolve_address(
+   ClientData clientData,
+   Tcl_Interp *interp,
+   int objc,
+   Tcl_Obj *const objv[]
+) {
+   const char *fullname = NULL;
+   Tcl_Obj *callbackScript = NULL;
+   active_resolve *activeResolve = NULL;
+
+   // check for the appropriate number of arguments
+   if(objc != 3) {
+      Tcl_WrongNumArgs(interp, 1, objv, "<fullname> <script>");
+      return(TCL_ERROR);
+   }
+
+   // retrieve the argument values
+   fullname = Tcl_GetString(objv[1]);
+   callbackScript = Tcl_DuplicateObj(objv[2]);
+
+   // increment the reference count on the callback script
+   // since we will be holding onto it until the callback
+   // is executed
+   Tcl_IncrRefCount(callbackScript);
+
+   // create the active_resolve structure
+   activeResolve = (active_resolve *)ckalloc(sizeof(active_resolve));
+   activeResolve->callback = callbackScript;
+   activeResolve->interp = interp;
+
+   // start the resolution
+   DNSServiceQueryRecord(
+      &activeResolve->sdRef,
+      0,
+      0,
+      fullname,
+      kDNSServiceType_A,
+      kDNSServiceClass_IN,
+      (DNSServiceQueryRecordReply)bonjour_resolve_address_callback,
+      (void *)activeResolve);
+      
    // retrieve the socket being used for the resolve operation
    // and register a file handler so that we know when
    // there is data to be read
@@ -221,3 +301,66 @@ static void bonjour_resolve_callback(
    }
 }
 
+////////////////////////////////////////////////////
+// called when a service query record result is received.
+// executes the appropriate Tcl callback to let
+// the application know what has happened
+////////////////////////////////////////////////////
+static void bonjour_resolve_address_callback(
+   DNSServiceRef sdRef,
+   DNSServiceFlags flags,
+   uint32_t interfaceIndex,
+   DNSServiceErrorType errorCode,
+   const char *fullname,
+   uint16_t rrtype,
+   uint16_t rrclass,
+   uint16_t rdlen,
+   const void *rdata,
+   uint32_t ttl,
+   void *context
+) {
+   active_resolve *activeResolve = (active_resolve *)context;
+   int result;
+
+   if(errorCode == kDNSServiceErr_NoError) {
+      char ip[16];
+      unsigned char *addr = (unsigned char *)rdata;
+      sprintf(ip, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
+
+      // append the service name and domain
+      Tcl_ListObjAppendElement(
+         activeResolve->interp,
+         activeResolve->callback,
+         Tcl_NewStringObj(ip, -1));
+
+      // evaluate the callback
+      result = Tcl_GlobalEvalObj(activeResolve->interp, 
+                                 activeResolve->callback);
+   } // end if no error
+   else {
+      // store an appropriate error message in the
+      // interpreter
+      Tcl_SetResult(
+         activeResolve->interp,
+         "Bonjour returned an error", 
+         TCL_STATIC);
+      result = TCL_ERROR;
+   }
+
+   // remove the file handler
+   Tcl_DeleteFileHandler(DNSServiceRefSockFD(activeResolve->sdRef));
+
+   // the callback is no longer being used, so decrement the
+   // reference count
+   Tcl_DecrRefCount(activeResolve->callback);
+
+   // deallocate the resolve service reference
+   DNSServiceRefDeallocate(activeResolve->sdRef);
+
+   // deallocate the active_resolve structure
+   ckfree((void *)activeResolve);
+
+   if(result == TCL_ERROR) {
+      Tcl_BackgroundError(activeResolve->interp);
+   }
+}

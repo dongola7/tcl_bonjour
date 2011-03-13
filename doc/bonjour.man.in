@@ -56,6 +56,14 @@ service name, the hostname, the port, and a list of txt records for
 the service.  The list of records will be of the form {key value 
 ?key value? ...}.
 
+[call [cmd ::bonjour::resolve_address] [arg name]]
+This procedure resolves the given service name into an IP address.
+[nl]
+[arg name] The name of the service to resolve
+[nl]
+[arg script] - The script to execute when the resolution has completed.
+The IP address of the service will be appended to the callback.
+
 [call [cmd ::bonjour::register] [arg ?options?] [arg regtype] [arg port] [arg ?txt-record?]]
 This procedure registers a new service using Bonjour.
 [nl]

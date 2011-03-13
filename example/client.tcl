@@ -8,11 +8,17 @@ proc serviceResolved {serviceName hostname port txtRecords} {
     puts "   txtRecords: $txtRecords"
 }
 
+# Called when a service address is resolved.
+proc addressResolved {address} {
+    puts "Address Resolved: $address"
+}
+
 # Called when a service is found.
 proc serviceFound {regType action name domain} {
     puts "$regType on $name.$domain: $action"
     if {$action eq "add"} {
         ::bonjour::resolve $name $regType $domain serviceResolved
+        ::bonjour::resolve_address $name addressResolved
     }
 }
 
