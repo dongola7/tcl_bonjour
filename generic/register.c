@@ -109,9 +109,6 @@ static int bonjour_register(
    const char *options[] = { "-name", "--", NULL };
    enum optionIndex { OPT_NAME, OPT_END };
 
-   if(objc < 3) {
-   }
-
    // parse options
    int objIndex;
    for(objIndex = 1; objIndex < objc; objIndex++) {
