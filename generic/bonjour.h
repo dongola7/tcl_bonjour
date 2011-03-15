@@ -49,4 +49,13 @@ int Resolve_Init(
    Tcl_Interp *interp
 );
 
+////////////////////////////////////////////////////
+// Helper functions
+////////////////////////////////////////////////////
+Tcl_Obj *create_dnsservice_error(
+   Tcl_Interp *interp,
+   const char *functionName, 
+   DNSServiceErrorType errorCode
+);
+
 #endif

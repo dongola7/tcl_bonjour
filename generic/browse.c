@@ -213,11 +213,22 @@ static int bonjour_browse_start(
    Tcl_SetHashValue(hashEntry, activeBrowse);
 
    // call DNSServiceBrowse
-   DNSServiceBrowse(
-      &activeBrowse->sdRef,
-      0, 0, regtype, NULL,
-      bonjour_browse_callback,
-      activeBrowse);
+   DNSServiceErrorType error =
+      DNSServiceBrowse(
+         &activeBrowse->sdRef,
+         0, 0, regtype, NULL,
+         bonjour_browse_callback,
+         activeBrowse);
+   if(error != kDNSServiceErr_NoError)
+   {
+      ckfree(activeBrowse->regtype);
+      ckfree((void *)activeBrowse);
+      Tcl_DecrRefCount(activeBrowse->callback);
+      Tcl_DeleteHashEntry(hashEntry);
+
+      Tcl_SetObjResult(interp, create_dnsservice_error(interp, "DNSServiceBrowse", error));
+      return TCL_ERROR;
+   }
 
    // retrieve the socket being used for the browse operation
    // and register a file handler so that we know when
@@ -327,10 +338,8 @@ static void bonjour_browse_callback(
    } // end if no error
    else {
       // store an appropriate error message in the interpreter
-      Tcl_SetResult(
-         activeBrowse->interp,
-         "Bonjour returned an error",
-         TCL_STATIC);
+      Tcl_SetObjResult(activeBrowse->interp, 
+         create_dnsservice_error(activeBrowse->interp, "DNSServiceBrowseReply", errorCode));
       result = TCL_ERROR;
    }
 

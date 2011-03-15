@@ -147,15 +147,25 @@ static int bonjour_resolve(
    activeResolve->interp = interp;
 
    // start the resolution
-   DNSServiceResolve(
-      &activeResolve->sdRef,
-      0,
-      0,
-      hostname,
-      regtype,
-      domain,
-      (DNSServiceResolveReply)bonjour_resolve_callback,
-      (void *)activeResolve);
+   DNSServiceErrorType error =
+      DNSServiceResolve(
+         &activeResolve->sdRef,
+         0,
+         0,
+         hostname,
+         regtype,
+         domain,
+         (DNSServiceResolveReply)bonjour_resolve_callback,
+         (void *)activeResolve);
+
+   if(error != kDNSServiceErr_NoError)
+   {
+      Tcl_DecrRefCount(activeResolve->callback);
+      ckfree((void *)activeResolve);
+
+      Tcl_SetObjResult(interp, create_dnsservice_error(interp, "DNSServiceResolve", error));
+      return TCL_ERROR;
+   }
 
    // retrieve the socket being used for the resolve operation
    // and register a file handler so that we know when
@@ -203,15 +213,24 @@ static int bonjour_resolve_address(
    activeResolve->interp = interp;
 
    // start the resolution
-   DNSServiceQueryRecord(
-      &activeResolve->sdRef,
-      0,
-      0,
-      fullname,
-      kDNSServiceType_A,
-      kDNSServiceClass_IN,
-      (DNSServiceQueryRecordReply)bonjour_resolve_address_callback,
-      (void *)activeResolve);
+   DNSServiceErrorType error =
+      DNSServiceQueryRecord(
+         &activeResolve->sdRef,
+         0,
+         0,
+         fullname,
+         kDNSServiceType_A,
+         kDNSServiceClass_IN,
+         (DNSServiceQueryRecordReply)bonjour_resolve_address_callback,
+         (void *)activeResolve);
+   if(error != kDNSServiceErr_NoError)
+   {
+      Tcl_DecrRefCount(activeResolve->callback);
+      ckfree((void *)activeResolve);
+
+      Tcl_SetObjResult(interp, create_dnsservice_error(interp, "DNSServiceQueryRecord", error));
+      return TCL_ERROR;
+   }
       
    // retrieve the socket being used for the resolve operation
    // and register a file handler so that we know when
@@ -276,10 +295,8 @@ static void bonjour_resolve_callback(
    else {
       // store an appropriate error message in the
       // interpreter
-      Tcl_SetResult(
-         activeResolve->interp,
-         "Bonjour returned an error", 
-         TCL_STATIC);
+      Tcl_SetObjResult(activeResolve->interp, 
+         create_dnsservice_error(activeResolve->interp, "DNSServiceResolveReply", errorCode));
       result = TCL_ERROR;
    }
 
@@ -340,10 +357,8 @@ static void bonjour_resolve_address_callback(
    else {
       // store an appropriate error message in the
       // interpreter
-      Tcl_SetResult(
-         activeResolve->interp,
-         "Bonjour returned an error", 
-         TCL_STATIC);
+      Tcl_SetObjResult(activeResolve->interp, 
+         create_dnsservice_error(activeResolve->interp, "DNSServiceQueryRecordReply", errorCode));
       result = TCL_ERROR;
    }
 

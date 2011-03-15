@@ -32,6 +32,7 @@ DAMAGE.
 #include <dns_sd.h>
 
 #include "txt_record.h"
+#include "bonjour.h"
 
 ////////////////////////////////////////////////////
 // Support structures
@@ -172,16 +173,27 @@ static int bonjour_register(
    // store the activeRegister structure
    Tcl_SetHashValue(hashEntry, activeRegister);
 
-   DNSServiceRegister(&activeRegister->sdRef,
-                      0, 0,
-                      serviceName, regtype,
-                      NULL, NULL,
-                      htons((uint16_t)port),
-                      txtLen, txtRecord, // txt record stuff
-                      NULL, NULL); // callback stuff
+   DNSServiceErrorType error =
+      DNSServiceRegister(&activeRegister->sdRef,
+                         0, 0,
+                         serviceName, regtype,
+                         NULL, NULL,
+                         htons((uint16_t)port),
+                         txtLen, txtRecord, // txt record stuff
+                         NULL, NULL); // callback stuff
 
    // free the txt record
    ckfree(txtRecord);
+
+   if(error != kDNSServiceErr_NoError)
+   {
+      ckfree(activeRegister->regtype);
+      ckfree((void *)activeRegister);
+      Tcl_DeleteHashEntry(hashEntry);
+
+      Tcl_SetObjResult(interp, create_dnsservice_error(interp, "DNSServiceRegister", error));
+      return TCL_ERROR;
+   }
 
    return TCL_OK;
 }

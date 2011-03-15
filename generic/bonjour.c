@@ -86,3 +86,103 @@ void bonjour_tcl_callback(
    DNSServiceProcessResult(sdRef);
 }
 
+////////////////////////////////////////////////////
+// translates a DNSServiceErrorType into a string
+////////////////////////////////////////////////////
+static const char *get_dnsserviceerror_string(DNSServiceErrorType errorCode)
+{
+   switch(errorCode)
+   {
+      case kDNSServiceErr_NoError:
+         return "NoError";
+      case kDNSServiceErr_Unknown:
+         return "Unknown";
+      case kDNSServiceErr_NoSuchName:
+         return "NoSuchName";
+      case kDNSServiceErr_NoMemory:
+         return "NoMemory";
+      case kDNSServiceErr_BadParam:
+         return "BadParam";
+      case kDNSServiceErr_BadReference:
+         return "BadReference";
+      case kDNSServiceErr_BadState:
+         return "BadState";
+      case kDNSServiceErr_BadFlags:
+         return "BadFlags";
+      case kDNSServiceErr_Unsupported:
+         return "Unsupported";
+      case kDNSServiceErr_NotInitialized:
+         return "NotInitialized";
+      case kDNSServiceErr_AlreadyRegistered:
+         return "AlreadyRegistered";
+      case kDNSServiceErr_NameConflict:
+         return "NameConflict";
+      case kDNSServiceErr_Invalid:
+         return "Invalid";
+      case kDNSServiceErr_Firewall:
+         return "Firewall";
+      case kDNSServiceErr_Incompatible:
+         return "Incompatible";
+      case kDNSServiceErr_BadInterfaceIndex:
+         return "BadInterfaceIndex";
+      case kDNSServiceErr_Refused:
+         return "Refused";
+      case kDNSServiceErr_NoSuchRecord:
+         return "NoSuchRecord";
+      case kDNSServiceErr_NoAuth:
+         return "NoAuth";
+      case kDNSServiceErr_NoSuchKey:
+         return "NoSuchKey";
+      case kDNSServiceErr_NATTraversal:
+         return "NATTraversal";
+      case kDNSServiceErr_DoubleNAT:
+         return "DoubleNAT";
+      case kDNSServiceErr_BadTime:
+         return "BadTime";
+      case kDNSServiceErr_BadSig:
+         return "BadSig";
+      case kDNSServiceErr_BadKey:
+         return "BadKey";
+      case kDNSServiceErr_Transient:
+         return "Transient";
+      case kDNSServiceErr_ServiceNotRunning:
+         return "ServiceNotRunning";
+      case kDNSServiceErr_NATPortMappingUnsupported:
+         return "NATPortMappingUnsupported";
+      case kDNSServiceErr_NATPortMappingDisabled:
+         return "NATPortMappingDisabled";
+      case kDNSServiceErr_NoRouter:
+         return "NoRouter";
+      case kDNSServiceErr_PollingMode:
+         return "PollingMode";
+   } // end switch(errorCode)
+
+   return NULL;
+}
+
+////////////////////////////////////////////////////
+// creates and returns an error message indiciating
+// a problem in one of the DNSService* series of
+// functions.
+////////////////////////////////////////////////////
+Tcl_Obj *create_dnsservice_error(
+   Tcl_Interp *interp,
+   const char *functionName, 
+   DNSServiceErrorType errorCode
+) {
+   Tcl_Obj *result = Tcl_NewListObj(0, NULL);
+   Tcl_ListObjAppendElement(interp, result, Tcl_NewStringObj("error in dns_sd", -1));
+   Tcl_ListObjAppendElement(interp, result, Tcl_NewStringObj(functionName, -1));
+
+   const char *errorString = get_dnsserviceerror_string(errorCode);
+   if(errorString == NULL)
+   {
+      Tcl_ListObjAppendElement(interp, result, Tcl_ObjPrintf("%d", errorCode));
+   }
+   else
+   {
+      Tcl_ListObjAppendElement(interp, result, Tcl_NewStringObj(errorString, -1));
+   }
+
+   return result;
+}
