@@ -6,11 +6,14 @@ package require bonjour
 proc serviceResolved {serviceName hostname port txtRecords} {
     puts "Resolved: $serviceName on $hostname:$port"
     puts "   txtRecords: $txtRecords"
+
+    # Try resolving an address for the hostname
+    ::bonjour::resolve_address $hostname [list addressResolved $hostname]
 }
 
 # Called when a service address is resolved.
-proc addressResolved {address} {
-    puts "Address Resolved: $address"
+proc addressResolved {name address} {
+    puts "Host \"$name\" resolved to: $address"
 }
 
 # Called when a service is found.
@@ -18,7 +21,6 @@ proc serviceFound {regType action name domain} {
     puts "$regType on $name.$domain: $action"
     if {$action eq "add"} {
         ::bonjour::resolve $name $regType $domain serviceResolved
-        ::bonjour::resolve_address $name addressResolved
     }
 }
 
