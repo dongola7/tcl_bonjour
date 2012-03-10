@@ -10,6 +10,14 @@ The bonjour package is written and maintained on OS X, but is known to work on v
 
 h1. Installation
 
+h2. MacPort
+
+If you already have MacPorts installed on your OS X system, you can install the latest version of tcl_bonjour via the command: @sudo port install tcl_bonjour@.
+
+See http://macports.org for additional information on MacPorts.
+
+h2. Source
+
 The bonjour package may be installed using the standard @configure; make; make install@ procedure.
 
 h1. Commands
