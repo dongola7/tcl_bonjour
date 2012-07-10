@@ -119,7 +119,7 @@ static int bonjour_browse(
    int objc,
    Tcl_Obj *const objv[]
 ) {
-   char *subcommands[] = {
+   static char *subcommands[] = {
       "start", "stop", NULL
    };
    const char *regtype = NULL;

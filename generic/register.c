@@ -107,7 +107,7 @@ static int bonjour_register(
    uint16_t txtLen = 0;
    void *txtRecord = NULL;
 
-   const char *options[] = { "-name", "--", NULL };
+   static const char *options[] = { "-name", "--", NULL };
    enum optionIndex { OPT_NAME, OPT_END };
 
    // parse options
