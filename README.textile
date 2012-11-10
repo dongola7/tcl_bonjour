@@ -16,6 +16,12 @@ If you already have MacPorts installed on your OS X system, you can install the 
 
 See http://macports.org for additional information on MacPorts.
 
+h2. Homebrew
+
+If you're using Homebrew, I maintain a tap containing a formula for tcl_bonjour. You can install using the following commands: @brew tap dongola7/dongola7; brew install tcl_bonjour@.
+
+See http://mxcl.github.com/homebrew/ for additional information on Homebrew.
+
 h2. Source
 
 The bonjour package may be installed using the standard @configure; make; make install@ procedure.
